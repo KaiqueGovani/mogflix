@@ -1,8 +1,14 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
 }
+
+val tmdbApiKey: String = Properties().apply {
+    load(project.rootProject.file("local.properties").inputStream())}.getProperty("TMDB_API_KEY")
+    ?: throw GradleException("TMDB_API_KEY not found in local.properties")
 
 android {
     namespace = "com.example.mogflix"
@@ -16,6 +22,11 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        buildFeatures {
+            buildConfig = true
+        }
+        buildConfigField("String", "TMDB_API_KEY", "\"$tmdbApiKey\"")
     }
 
     buildTypes {

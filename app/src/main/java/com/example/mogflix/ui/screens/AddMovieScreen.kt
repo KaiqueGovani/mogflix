@@ -1,5 +1,6 @@
 package com.example.mogflix.ui.screens
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -11,6 +12,8 @@ import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.Star
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -33,13 +36,20 @@ fun PreviewMovieScreen() {
 
 @Composable
 fun AddMovieScreen(
-    viewModel: MovieViewModel = viewModel(),
     onMovieAdded: () -> Unit,
 ) {
+    val viewModel: MovieViewModel = viewModel()
+    val suggestions by viewModel.suggestions.collectAsState()
+
     var title by remember { mutableStateOf(TextFieldValue("")) }
     var description by remember { mutableStateOf(TextFieldValue(""))}
     var year by remember { mutableStateOf(TextFieldValue("")) }
     var rating by remember { mutableFloatStateOf(0f) }
+
+    LaunchedEffect(title) {
+        kotlinx.coroutines.delay(300)
+        viewModel.getMovieSuggestions(title.text)
+    }
 
     Column(
         modifier = Modifier.fillMaxSize().padding(24.dp),
@@ -54,6 +64,18 @@ fun AddMovieScreen(
             label = { Text("Title") },
             modifier = Modifier.fillMaxWidth()
         )
+
+        suggestions.forEach { suggestion ->
+            Text(
+                text = "${suggestion.title} (${suggestion.release_date ?: "?"})",
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable {
+                        title = TextFieldValue(suggestion.title)
+                    }
+                    .padding(vertical = 4.dp)
+            )
+        }
 
         OutlinedTextField(
             value = description,
