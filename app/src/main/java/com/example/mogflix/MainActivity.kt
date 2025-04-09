@@ -4,14 +4,22 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.layout.Layout
+import androidx.compose.ui.unit.dp
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import com.example.mogflix.data.model.Movie
+import com.example.mogflix.ui.navigation.NavRoutes
+import com.example.mogflix.ui.screens.AddMovieScreen
+import com.example.mogflix.ui.screens.MovieListScreen
 import com.example.mogflix.ui.theme.MogflixTheme
+import com.example.mogflix.viewmodel.MovieViewModel
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -19,11 +27,11 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             MogflixTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
+                val navController = rememberNavController()
+                Box(
+                    modifier = Modifier.padding(bottom = 50.dp, top=20.dp)
+                ){
+                    AppNavigation(navController)
                 }
             }
         }
@@ -31,17 +39,26 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    MogflixTheme {
-        Greeting("Android")
+fun AppNavigation(navController: NavHostController) {
+    NavHost(navController = navController, startDestination = NavRoutes.MovieList.route) {
+        composable(NavRoutes.MovieList.route) {
+            val fakeViewModel = MovieViewModel().apply {
+                addMovie(Movie(1, "Filme X", "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam ornare gravida lacus.", 2020, 9.05f))
+                addMovie(Movie(2, "Filme Y", "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam ornare gravida lacus.", 2020, 9.05f))
+            }
+            MovieListScreen(
+                viewModel = fakeViewModel,
+                onAddMovieClick = {
+                    navController.navigate(NavRoutes.AddMovie.route)
+                }
+            )
+        }
+        composable(NavRoutes.AddMovie.route) {
+            AddMovieScreen (
+                onMovieAdded = {
+                    navController.popBackStack() // Go back to movie list
+                }
+            )
+        }
     }
 }
