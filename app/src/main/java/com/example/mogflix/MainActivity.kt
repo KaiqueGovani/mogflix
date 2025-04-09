@@ -10,6 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -40,12 +41,14 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun AppNavigation(navController: NavHostController) {
+    val fakeViewModel = MovieViewModel().apply {
+        addMovie(Movie(1, "Filme X", "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam ornare gravida lacus.", 2020, 9.05f))
+        addMovie(Movie(2, "Filme Y", "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam ornare gravida lacus.", 2020, 9.05f))
+    }
+
     NavHost(navController = navController, startDestination = NavRoutes.MovieList.route) {
         composable(NavRoutes.MovieList.route) {
-            val fakeViewModel = MovieViewModel().apply {
-                addMovie(Movie(1, "Filme X", "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam ornare gravida lacus.", 2020, 9.05f))
-                addMovie(Movie(2, "Filme Y", "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam ornare gravida lacus.", 2020, 9.05f))
-            }
+
             MovieListScreen(
                 viewModel = fakeViewModel,
                 onAddMovieClick = {
@@ -55,6 +58,7 @@ fun AppNavigation(navController: NavHostController) {
         }
         composable(NavRoutes.AddMovie.route) {
             AddMovieScreen (
+                viewModel = fakeViewModel,
                 onMovieAdded = {
                     navController.popBackStack() // Go back to movie list
                 }

@@ -21,6 +21,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.mogflix.data.model.Movie
+import com.example.mogflix.viewmodel.MovieViewModel
 
 @Preview(showBackground = true)
 @Composable
@@ -30,9 +33,11 @@ fun PreviewMovieScreen() {
 
 @Composable
 fun AddMovieScreen(
+    viewModel: MovieViewModel = viewModel(),
     onMovieAdded: () -> Unit,
 ) {
     var title by remember { mutableStateOf(TextFieldValue("")) }
+    var description by remember { mutableStateOf(TextFieldValue(""))}
     var year by remember { mutableStateOf(TextFieldValue("")) }
     var rating by remember { mutableFloatStateOf(0f) }
 
@@ -47,6 +52,13 @@ fun AddMovieScreen(
             value = title,
             onValueChange = { title = it },
             label = { Text("Title") },
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        OutlinedTextField(
+            value = description,
+            onValueChange = { description = it },
+            label = { Text("Description") },
             modifier = Modifier.fillMaxWidth()
         )
 
@@ -77,7 +89,8 @@ fun AddMovieScreen(
 
         Button(
             onClick = {
-                onMovieAdded()
+                onMovieAdded();
+                viewModel.addMovie(Movie(1, title.text, description.text, year.text.toInt(), rating) )
             },
             modifier = Modifier.align(Alignment.End)
         ) {
