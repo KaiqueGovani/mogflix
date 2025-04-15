@@ -1,0 +1,37 @@
+app/src/main/java/com/example
+└── mogflix
+    ├── MainActivity.kt
+    ├── data
+    │   ├── local
+    │   │   ├── Converters.kt
+    │   │   ├── MovieDatabase.kt
+    │   │   ├── MovieModule.kt
+    │   │   ├── dao
+    │   │   │   └── MovieDAO.kt
+    │   │   └── entity
+    │   │       └── MovieEntity.kt
+    │   ├── model
+    │   │   └── Movie.kt
+    │   ├── remote
+    │   │   ├── MovieSearchResponse.kt
+    │   │   ├── TmdbApiClient.kt
+    │   │   └── TmdbApiService.kt
+    │   └── repository
+    │       └── MovieRepository.kt
+    ├── ui
+    │   ├── components
+    │   │   ├── DatePickerModal.kt
+    │   │   └── MovieCard.kt
+    │   ├── navigation
+    │   │   └── NavRoutes.kt
+    │   ├── screens
+    │   │   ├── AddMovieScreen.kt
+    │   │   └── MovieListScreen.kt
+    │   └── theme
+    │       ├── Color.kt
+    │       ├── Theme.kt
+    │       └── Type.kt
+    └── viewmodel
+        └── MovieViewModel.kt
+
+15 directories, 20 files
