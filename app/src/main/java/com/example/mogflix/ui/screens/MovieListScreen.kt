@@ -5,6 +5,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
@@ -13,13 +14,14 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.mogflix.data.model.Movie
 import com.example.mogflix.ui.components.MovieCard
 import com.example.mogflix.viewmodel.MovieViewModel
+import java.util.Date
 
 @Preview(showBackground = true)
 @Composable
 fun MoviesPreview(){
     val fakeViewModel = MovieViewModel().apply {
-        addMovie(Movie(1, "Filme X", "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam ornare gravida lacus.", 2020, 9.05f))
-        addMovie(Movie(2, "Filme Y", "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam ornare gravida lacus.", 2020, 9.05f))
+        addMovie(Movie(1, "Filme X", "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam ornare gravida lacus.", Date(2020), 9.05f))
+        addMovie(Movie(2, "Filme Y", "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam ornare gravida lacus.", Date(20), 9.05f))
     }
 
     MovieListScreen(viewModel = fakeViewModel, onAddMovieClick = {})
@@ -31,14 +33,14 @@ fun MovieListScreen(
     onAddMovieClick: () -> Unit,
     viewModel: MovieViewModel = viewModel()
 ){
-    val movies = viewModel.movies
+    val movies = viewModel.movies.collectAsState()
 
     Box(
         modifier = Modifier
                 .fillMaxSize()
                 .padding(8.dp)
     ){
-       if (movies.isEmpty()) {
+       if (movies.value.isEmpty()) {
            Column(
                modifier = Modifier.align(Alignment.Center),
                horizontalAlignment = Alignment.CenterHorizontally
@@ -54,7 +56,7 @@ fun MovieListScreen(
        } else {
         Column(modifier = Modifier.fillMaxSize()) {
             LazyColumn(modifier = Modifier.weight(1f)) {
-                items(movies) { movie ->
+                items(movies.value) { movie ->
                     MovieCard(movie)
                 }
             }

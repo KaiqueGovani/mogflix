@@ -26,7 +26,7 @@ fun MovieCard(movie: Movie) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(text = movie.title, style = MaterialTheme.typography.titleMedium)
             Spacer(modifier = Modifier.height(4.dp))
-            Text(text = "Ano: ${movie.releaseYear}")
+            Text(text = "Ano: ${movie.watchedDate}")
             Text(text = "Nota: ${movie.rating}")
         }
     }

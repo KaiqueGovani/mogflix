@@ -14,6 +14,8 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.mogflix.data.local.MovieDatabase
+import com.example.mogflix.data.local.MovieModule
 import com.example.mogflix.data.model.Movie
 import com.example.mogflix.ui.navigation.NavRoutes
 import com.example.mogflix.ui.screens.AddMovieScreen
@@ -24,6 +26,10 @@ import com.example.mogflix.viewmodel.MovieViewModel
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // Initialize database
+        MovieModule.init(this)
+
         enableEdgeToEdge()
         setContent {
             MogflixTheme {
@@ -40,16 +46,17 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun AppNavigation(navController: NavHostController) {
-    val fakeViewModel = MovieViewModel().apply {
-        addMovie(Movie(1, "Filme X", "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam ornare gravida lacus.", 2020, 9.05f))
-        addMovie(Movie(2, "Filme Y", "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam ornare gravida lacus.", 2020, 9.05f))
-    }
+    val viewModel = MovieViewModel();
+//    val fakeViewModel = MovieViewModel().apply {
+//        addMovie(Movie(1, "Filme X", "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam ornare gravida lacus.", 2020, 9.05f))
+//        addMovie(Movie(2, "Filme Y", "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam ornare gravida lacus.", 2020, 9.05f))
+//    }
 
     NavHost(navController = navController, startDestination = NavRoutes.MovieList.route) {
         composable(NavRoutes.MovieList.route) {
 
             MovieListScreen(
-                viewModel = fakeViewModel,
+                viewModel = viewModel,
                 onAddMovieClick = {
                     navController.navigate(NavRoutes.AddMovie.route)
                 }
@@ -57,7 +64,7 @@ fun AppNavigation(navController: NavHostController) {
         }
         composable(NavRoutes.AddMovie.route) {
             AddMovieScreen (
-                viewModel = fakeViewModel,
+                viewModel = viewModel,
                 onMovieAdded = {
                     navController.popBackStack() // Go back to movie list
                 }

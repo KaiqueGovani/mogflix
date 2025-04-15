@@ -1,9 +1,10 @@
 package com.example.mogflix.viewmodel
 
 import android.util.Log
-import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.mogflix.data.local.MovieModule
+import com.example.mogflix.data.local.entity.MovieEntity
 import com.example.mogflix.data.model.Movie
 import com.example.mogflix.data.remote.MovieDto
 import com.example.mogflix.data.remote.TmdbApiClient
@@ -14,15 +15,38 @@ import kotlinx.coroutines.launch
 import retrofit2.HttpException
 
 class MovieViewModel : ViewModel() {
-    private val _movies = mutableStateListOf<Movie>()
-    val movies: List<Movie> = _movies
+    private val movieDao = MovieModule.database.movieDao()
 
-    fun addMovie(movie: Movie) {
-        _movies.add(movie)
+    private val _movies = MutableStateFlow<List<Movie>>(emptyList())
+    val movies: StateFlow<List<Movie>> = _movies
+
+    init {
+        viewModelScope.launch {
+            movieDao.getAll().collect { entities ->
+                _movies.value = entities.map {
+                    Movie(id = it.id, title = it.title, watchedDate = it.watchedDate, rating = it.rating)
+                }
+            }
+        }
     }
 
-    fun deleteMovie(movie: Movie) {
-        _movies.remove(movie)
+    fun addMovie(movie: Movie) {
+        viewModelScope.launch {
+            movieDao.insert(
+                MovieEntity(
+                    title = movie.title,
+                    watchedDate = movie.watchedDate,
+                    description = movie.description,
+                    rating = movie.rating
+                )
+            )
+        }
+    }
+
+    fun deleteMovieById(id: Int) {
+        viewModelScope.launch {
+            MovieModule.database.movieDao().deleteById(id)
+        }
     }
 
     private val _suggestions = MutableStateFlow<List<MovieDto>>(emptyList())
@@ -53,4 +77,7 @@ class MovieViewModel : ViewModel() {
         }
     }
 
+    fun clearSuggestions() {
+        _suggestions.value = emptyList()
+    }
 }
