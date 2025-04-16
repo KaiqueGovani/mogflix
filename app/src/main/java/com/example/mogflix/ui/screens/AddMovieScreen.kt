@@ -51,8 +51,6 @@ fun AddMovieScreen(
     var selectedWatchedDate by remember { mutableStateOf<Long?>(null) }
     var rating by remember { mutableFloatStateOf(0f) }
 
-
-
     LaunchedEffect(title) {
         kotlinx.coroutines.delay(300)
         viewModel.getMovieSuggestions(title.text)

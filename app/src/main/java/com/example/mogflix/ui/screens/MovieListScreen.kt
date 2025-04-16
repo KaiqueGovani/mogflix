@@ -18,57 +18,77 @@ import java.util.Date
 
 @Preview(showBackground = true)
 @Composable
-fun MoviesPreview(){
+fun MoviesPreview() {
     val fakeViewModel = MovieViewModel().apply {
-        addMovie(Movie(1, "Filme X", "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam ornare gravida lacus.", Date(2020), 9.05f))
-        addMovie(Movie(2, "Filme Y", "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam ornare gravida lacus.", Date(20), 9.05f))
+        addMovie(
+            Movie(
+                1,
+                "Filme X",
+                "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+                Date(2020),
+                9.05f
+            )
+        )
+        addMovie(
+            Movie(
+                2,
+                "Filme Y",
+                "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+                Date(2020),
+                8.7f
+            )
+        )
     }
 
-    MovieListScreen(viewModel = fakeViewModel, onAddMovieClick = {})
+    MovieListScreen(
+        viewModel = fakeViewModel,
+        onAddMovieClick = {},
+        onMovieClick = {}
+    )
 }
-
 
 @Composable
 fun MovieListScreen(
     onAddMovieClick: () -> Unit,
-    viewModel: MovieViewModel = viewModel()
-){
+    onMovieClick: (Int) -> Unit,
+    viewModel: MovieViewModel = viewModel(),
+) {
     val movies = viewModel.movies.collectAsState()
 
     Box(
         modifier = Modifier
-                .fillMaxSize()
-                .padding(8.dp)
-    ){
-       if (movies.value.isEmpty()) {
-           Column(
-               modifier = Modifier.align(Alignment.Center),
-               horizontalAlignment = Alignment.CenterHorizontally
-           ) {
-               Text(text = "Parece que você ainda não adicionou nenhum filme…")
-               Spacer(modifier = Modifier.height(8.dp))
-               Text(text = "Clique no botão abaixo para adicionar!")
-               Spacer(modifier = Modifier.height(16.dp))
-               Button(onClick = onAddMovieClick) {
-                   Text(text = "+ Novo filme")
-               }
-           }
-       } else {
-        Column(modifier = Modifier.fillMaxSize()) {
-            LazyColumn(modifier = Modifier.weight(1f)) {
-                items(movies.value) { movie ->
-                    MovieCard(movie)
+            .fillMaxSize()
+            .padding(8.dp)
+    ) {
+        if (movies.value.isEmpty()) {
+            Column(
+                modifier = Modifier.align(Alignment.Center),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(text = "Parece que você ainda não adicionou nenhum filme…")
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(text = "Clique no botão abaixo para adicionar!")
+                Spacer(modifier = Modifier.height(16.dp))
+                Button(onClick = onAddMovieClick) {
+                    Text(text = "+ Novo filme")
                 }
             }
+        } else {
+            Column(modifier = Modifier.fillMaxSize()) {
+                LazyColumn(modifier = Modifier.weight(1f)) {
+                    items(movies.value) { movie ->
+                        MovieCard(movie = movie, onClick = { onMovieClick(movie.id) })
+                    }
+                }
 
-            Spacer(modifier = Modifier.height(8.dp))
-            Button(
-                modifier = Modifier.fillMaxWidth(),
-                onClick = onAddMovieClick
-            ) {
-                Text(text = "+ Novo filme")
+                Spacer(modifier = Modifier.height(8.dp))
+                Button(
+                    modifier = Modifier.fillMaxWidth(),
+                    onClick = onAddMovieClick
+                ) {
+                    Text(text = "+ Novo filme")
+                }
             }
         }
-       }
     }
 }

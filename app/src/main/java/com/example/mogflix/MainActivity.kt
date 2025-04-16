@@ -54,20 +54,35 @@ fun AppNavigation(navController: NavHostController) {
 
     NavHost(navController = navController, startDestination = NavRoutes.MovieList.route) {
         composable(NavRoutes.MovieList.route) {
-
             MovieListScreen(
                 viewModel = viewModel,
                 onAddMovieClick = {
                     navController.navigate(NavRoutes.AddMovie.route)
+                },
+                onMovieClick = { movieId ->
+                    navController.navigate(NavRoutes.MovieDetails.createRoute(movieId))
                 }
             )
         }
         composable(NavRoutes.AddMovie.route) {
-            AddMovieScreen (
+            AddMovieScreen(
                 viewModel = viewModel,
                 onMovieAdded = {
-                    navController.popBackStack() // Go back to movie list
+                    navController.popBackStack()
                 }
+            )
+        }
+        composable(
+            route = NavRoutes.MovieDetails.route,
+            arguments = listOf(
+                androidx.navigation.navArgument("movieId") { type = androidx.navigation.NavType.IntType }
+            )
+        ) { backStackEntry ->
+            val movieId = backStackEntry.arguments?.getInt("movieId") ?: -1
+            com.example.mogflix.ui.screens.MovieDetailScreen(
+                movieId = movieId,
+                viewModel = viewModel,
+                onBack = { navController.popBackStack() }
             )
         }
     }
