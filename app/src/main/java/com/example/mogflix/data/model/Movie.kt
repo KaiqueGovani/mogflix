@@ -7,5 +7,7 @@ data class Movie(
     val title: String,
     val description: String = "",
     val watchedDate: Date = Date(),
-    val rating: Float = 0f
+    val rating: Float = 0f,
+    val overview: String,
+    val posterPath: String?
 )

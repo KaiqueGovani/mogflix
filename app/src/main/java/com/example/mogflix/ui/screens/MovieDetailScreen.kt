@@ -6,13 +6,12 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -32,14 +31,13 @@ fun MovieDetailScreen(
 
     if (movie == null) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            Text("Filme não encontrado.")
+            Text(
+                "Filme não encontrado.",
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
+            )
         }
         return
-    }
-
-    val tmdbDetails by viewModel.movieDetails
-    LaunchedEffect(movie.title) {
-        viewModel.fetchMovieDetails(movie.title)
     }
 
     val dateFormatter = remember { SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()) }
@@ -57,18 +55,17 @@ fun MovieDetailScreen(
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Voltar",
-                            tint = MaterialTheme.colorScheme.primary
+                            tint = MaterialTheme.colorScheme.onSurface
                         )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color.White
+                    containerColor = MaterialTheme.colorScheme.surface
                 )
             )
-        },
-        containerColor = MaterialTheme.colorScheme.background
+        }
     ) { padding ->
 
         val scrollState = rememberScrollState()
@@ -106,7 +103,7 @@ fun MovieDetailScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             // Poster
-            tmdbDetails?.poster_path?.let { path ->
+            movie?.posterPath?.let { path ->
                 AsyncImage(
                     model = "https://image.tmdb.org/t/p/w500$path",
                     contentDescription = "Poster do Filme",
@@ -125,7 +122,7 @@ fun MovieDetailScreen(
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(
-                text = tmdbDetails?.overview ?: "Sem sumário disponível.",
+                text = movie?.overview ?: "Sem sumário disponível.",
                 color = MaterialTheme.colorScheme.onSurface,
                 style = MaterialTheme.typography.bodyLarge
             )
@@ -160,6 +157,12 @@ fun MovieDetailScreen(
                     contentColor = Color.White
                 )
             ) {
+                Icon(
+                    Icons.Default.Delete,
+                    contentDescription = null,
+                    modifier = Modifier.size(18.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
                 Text("Excluir Filme")
             }
         }

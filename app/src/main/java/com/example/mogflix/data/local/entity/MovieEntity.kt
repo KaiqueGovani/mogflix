@@ -13,5 +13,8 @@ data class MovieEntity(
     val description: String,
     @ColumnInfo(name = "watched_date")
     val watchedDate: Date,
-    val rating: Float
+    val rating: Float,
+    val overview: String,
+    @ColumnInfo(name = "poster_path")
+    val posterPath: String?
 )
