@@ -1,11 +1,13 @@
 package com.example.mogflix.viewmodel
 
 import android.util.Log
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.mogflix.data.local.MovieModule
 import com.example.mogflix.data.local.entity.MovieEntity
 import com.example.mogflix.data.model.Movie
+import com.example.mogflix.data.remote.MovieDetailsDto
 import com.example.mogflix.data.remote.MovieDto
 import com.example.mogflix.data.remote.TmdbApiClient
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -13,6 +15,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.State
 
 class MovieViewModel : ViewModel() {
     private val movieDao = MovieModule.database.movieDao()
@@ -24,7 +28,13 @@ class MovieViewModel : ViewModel() {
         viewModelScope.launch {
             movieDao.getAll().collect { entities ->
                 _movies.value = entities.map {
-                    Movie(id = it.id, title = it.title, watchedDate = it.watchedDate, rating = it.rating)
+                    Movie(
+                        id = it.id,
+                        title = it.title,
+                        description = it.description,
+                        watchedDate = it.watchedDate,
+                        rating = it.rating
+                    )
                 }
             }
         }
@@ -49,6 +59,7 @@ class MovieViewModel : ViewModel() {
         }
     }
 
+    // TMDB Suggestions
     private val _suggestions = MutableStateFlow<List<MovieDto>>(emptyList())
     val suggestions: StateFlow<List<MovieDto>> = _suggestions.asStateFlow()
 
@@ -79,5 +90,27 @@ class MovieViewModel : ViewModel() {
 
     fun clearSuggestions() {
         _suggestions.value = emptyList()
+    }
+
+    private val _movieDetails = mutableStateOf<MovieDetailsDto?>(null)
+    val movieDetails: State<MovieDetailsDto?> = _movieDetails
+
+    fun fetchMovieDetails(title: String) {
+        viewModelScope.launch {
+            try {
+                val searchResult = TmdbApiClient.api.searchMovies(title)
+                val movie = searchResult.results.firstOrNull()
+
+                if (movie != null) {
+                    val details = TmdbApiClient.api.getMovieDetails(movie.id)
+                    _movieDetails.value = details
+                } else {
+                    _movieDetails.value = null
+                }
+            } catch (e: Exception) {
+                Log.e("MovieViewModel", "Erro ao buscar detalhes do filme: ${e.message}")
+                _movieDetails.value = null
+            }
+        }
     }
 }

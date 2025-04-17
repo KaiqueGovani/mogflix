@@ -10,6 +10,7 @@ import com.example.mogflix.data.model.Movie
 import java.text.SimpleDateFormat
 import java.util.*
 import androidx.compose.runtime.remember
+import androidx.compose.ui.text.font.FontWeight
 
 @Composable
 fun MovieCard(
@@ -21,15 +22,28 @@ fun MovieCard(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 4.dp)
             .clickable { onClick() },
-        elevation = CardDefaults.cardElevation(4.dp)
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        ),
+        elevation = CardDefaults.cardElevation(6.dp),
+        shape = MaterialTheme.shapes.medium
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
-            Text(text = movie.title, style = MaterialTheme.typography.titleMedium)
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(text = "Assistido em: ${formatter.format(movie.watchedDate)}")
-            Text(text = "Nota: ${movie.rating}")
+            Text(
+                text = movie.title,
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold
+            )
+            Spacer(modifier = Modifier.height(6.dp))
+            Text(
+                text = "Assistido em: ${formatter.format(movie.watchedDate)}",
+                style = MaterialTheme.typography.bodyMedium
+            )
+            Text(
+                text = "Nota: ${movie.rating}",
+                style = MaterialTheme.typography.bodyMedium
+            )
         }
     }
 }

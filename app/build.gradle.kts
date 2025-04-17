@@ -71,6 +71,8 @@ dependencies {
     implementation(libs.retrofit)
     implementation(libs.converter.gson)
     implementation(libs.kotlinx.coroutines.android)
+    implementation("io.coil-kt:coil-compose:2.4.0")
+    implementation("androidx.compose.ui:ui-text-google-fonts:1.5.0")
 
     testImplementation(libs.junit)
 

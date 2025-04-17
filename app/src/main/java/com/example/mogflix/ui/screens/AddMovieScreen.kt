@@ -4,10 +4,16 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.Star
 import androidx.compose.material3.*
@@ -21,6 +27,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -35,125 +42,187 @@ import java.util.Locale
 @Preview(showBackground = true)
 @Composable
 fun PreviewMovieScreen() {
-    AddMovieScreen(onMovieAdded = {}, viewModel = MovieViewModel())
+    AddMovieScreen(onMovieAdded = {}, onMovieCancelled = {}, viewModel = MovieViewModel())
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddMovieScreen(
     onMovieAdded: () -> Unit,
+    onMovieCancelled: () -> Unit,
     viewModel: MovieViewModel
 ) {
     val suggestions by viewModel.suggestions.collectAsState()
 
     var title by remember { mutableStateOf(TextFieldValue("")) }
     var description by remember { mutableStateOf(TextFieldValue("")) }
-    var showDateModal by remember { mutableStateOf<Boolean>(false) }
+    var showDateModal by remember { mutableStateOf(false) }
     var selectedWatchedDate by remember { mutableStateOf<Long?>(null) }
     var rating by remember { mutableFloatStateOf(0f) }
+    var movieSelected by remember { mutableStateOf(false) }
 
-    LaunchedEffect(title) {
-        kotlinx.coroutines.delay(300)
-        viewModel.getMovieSuggestions(title.text)
+    LaunchedEffect(title.text) {
+        if (title.text.isNotBlank() && !movieSelected) {
+            kotlinx.coroutines.delay(300)
+            viewModel.getMovieSuggestions(title.text)
+        }
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(24.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
+    val dateText = selectedWatchedDate?.let {
+        SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date(it))
+    } ?: "Nenhuma data selecionada"
 
-        Text(text = "Add a New Movie", style = MaterialTheme.typography.titleLarge)
-
-        OutlinedTextField(
-            value = title,
-            onValueChange = { title = it },
-            label = { Text("Title") },
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        suggestions.forEach { suggestion ->
-            Text(
-                text = "${suggestion.title} (${suggestion.release_date ?: "?"})",
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable {
-                        title = TextFieldValue(suggestion.title)
-                        viewModel.clearSuggestions()
-                    }
-                    .padding(vertical = 4.dp)
-            )
-        }
-
-        OutlinedTextField(
-            value = description,
-            onValueChange = { description = it },
-            label = { Text("Description") },
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        Button(
-            onClick = { showDateModal = true },
-            modifier = Modifier.align(Alignment.Start)
-        ) {
-            Text("Pick a date")
-        }
-        if (selectedWatchedDate != null) {
-            val date = Date(selectedWatchedDate!!)
-            val formatedDate = DateFormat.getDateInstance().format(date)
-            Text("Selected date: $formatedDate")
-        } else {
-            Text("No date selected")
-        }
-        if (showDateModal)
-            DatePickerModal(
-                onDateSelected = {
-                    selectedWatchedDate = it
-                    showDateModal = false
-                },
-                onDismiss = {
-                    showDateModal = false
-                }
-            )
-
-
-
-        Text(text = "Rating")
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            (1..5).forEach { i ->
-                IconToggleButton(
-                    checked = rating >= i,
-                    onCheckedChange = { rating = i.toFloat() }
-                ) {
-                    Icon(
-                        imageVector = if (rating >= i) Icons.Default.Star else Icons.Outlined.Star,
-                        contentDescription = null
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = {
+                    Text(
+                        "Adicionar Filme",
+                        color = MaterialTheme.colorScheme.primary,
+                        style = MaterialTheme.typography.titleLarge
                     )
+                },
+                navigationIcon = {
+                    IconButton(onClick = onMovieCancelled) {
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Voltar",
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color.White
+                )
+            )
+        },
+        containerColor = MaterialTheme.colorScheme.background
+    ) { padding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+                .padding(horizontal = 24.dp, vertical = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(20.dp)
+        ) {
+            Text(
+                text = "Preencha as informações abaixo",
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onBackground
+            )
+
+            OutlinedTextField(
+                value = title,
+                onValueChange = {
+                    title = it
+                    movieSelected = false
+                },
+                label = { Text("Título do filme") },
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            suggestions.forEach { suggestion ->
+                Text(
+                    text = "${suggestion.title} (${suggestion.release_date ?: "?"})",
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable {
+                            title = TextFieldValue(suggestion.title)
+                            viewModel.clearSuggestions()
+                            movieSelected = true
+                        }
+                        .padding(vertical = 4.dp),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+            }
+
+            OutlinedTextField(
+                value = description,
+                onValueChange = { description = it },
+                label = { Text("Descrição pessoal") },
+                modifier = Modifier.fillMaxWidth(),
+                maxLines = 5
+            )
+
+            Column {
+                Text("Data assistida", style = MaterialTheme.typography.titleMedium)
+                Spacer(modifier = Modifier.height(6.dp))
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = dateText,
+                        modifier = Modifier.weight(1f),
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    OutlinedButton(
+                        onClick = { showDateModal = true },
+                        shape = MaterialTheme.shapes.small
+                    ) {
+                        Text("Selecionar")
+                    }
                 }
             }
-        }
 
-        Button(
-            onClick = {
-                onMovieAdded();
-                viewModel.addMovie(
-                    Movie(
-                        1,
-                        title.text,
-                        description.text,
-                        Date(selectedWatchedDate!!),
-                        rating
-                    )
+            if (showDateModal) {
+                DatePickerModal(
+                    onDateSelected = {
+                        selectedWatchedDate = it
+                        showDateModal = false
+                    },
+                    onDismiss = { showDateModal = false }
                 )
-            },
-            modifier = Modifier.align(Alignment.End)
-        ) {
-            Text("Add")
+            }
+
+            Text("Avaliação", style = MaterialTheme.typography.titleMedium)
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                (1..5).forEach { i ->
+                    IconToggleButton(
+                        checked = rating >= i,
+                        onCheckedChange = { rating = i.toFloat() }
+                    ) {
+                        Icon(
+                            imageVector = if (rating >= i) Icons.Default.Star else Icons.Outlined.Star,
+                            contentDescription = null,
+                            tint = if (rating >= i)
+                                MaterialTheme.colorScheme.secondary
+                            else
+                                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
+                        )
+                    }
+                }
+            }
+
+            Button(
+                onClick = {
+                    if (selectedWatchedDate != null) {
+                        viewModel.addMovie(
+                            Movie(
+                                id = 0,
+                                title = title.text,
+                                description = description.text,
+                                watchedDate = Date(selectedWatchedDate!!),
+                                rating = rating
+                            )
+                        )
+                        onMovieAdded()
+                    }
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 16.dp),
+                enabled = title.text.isNotBlank() && selectedWatchedDate != null,
+                shape = RoundedCornerShape(50),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = Color.White
+                )
+            ) {
+                Text("Adicionar")
+            }
         }
     }
-
-
 }

@@ -7,7 +7,8 @@ import java.util.Date
 
 @Entity(tableName = "movies")
 data class MovieEntity(
-    @PrimaryKey() val id: Int = 0,
+    @PrimaryKey(autoGenerate = true)
+    val id: Int = 0,
     val title: String,
     val description: String,
     @ColumnInfo(name = "watched_date")

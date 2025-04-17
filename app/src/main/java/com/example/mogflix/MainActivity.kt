@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.core.view.WindowCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -30,9 +31,10 @@ class MainActivity : ComponentActivity() {
         // Initialize database
         MovieModule.init(this)
 
-        enableEdgeToEdge()
         setContent {
-            MogflixTheme {
+            MogflixTheme(
+                dynamicColor = false
+            ) {
                 val navController = rememberNavController()
                 Box(
                     modifier = Modifier.padding(bottom = 50.dp, top=20.dp)
@@ -67,9 +69,8 @@ fun AppNavigation(navController: NavHostController) {
         composable(NavRoutes.AddMovie.route) {
             AddMovieScreen(
                 viewModel = viewModel,
-                onMovieAdded = {
-                    navController.popBackStack()
-                }
+                onMovieAdded = { navController.popBackStack() },
+                onMovieCancelled = { navController.popBackStack() }
             )
         }
         composable(
